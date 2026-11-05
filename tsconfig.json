@@ -5,6 +5,6 @@
     "jsx": "react-jsx",
     "strict": true,
     "moduleResolution": "bundler",
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "types": ["vitest/globals"]
   }
 }

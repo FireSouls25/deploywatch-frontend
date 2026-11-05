@@ -41,9 +41,22 @@ npm run dev     # http://localhost:5173 (proxy /api -> localhost:8000)
 ## Conexión con el backend
 
 - En desarrollo, `vite.config.ts` redirige `/api` a `http://localhost:8000`.
-- En producción (Nginx), `nginx.conf` redirige `/api/` al servicio `api:8000`.
-  Si despliegas frontend y backend por separado, ajusta ese `proxy_pass` a la URL
-  pública del backend.
+- En Docker, `nginx.conf.template` redirige `/api/` a `${BACKEND_URL}`
+  (por defecto `http://host.docker.internal:8000`, es decir, el backend
+  corriendo en tu máquina). Para apuntar a otra URL:
+  ```bash
+  BACKEND_URL=http://mi-backend:8000 docker compose up --build
+  ```
+
+## Docker (compose)
+
+```bash
+docker compose up --build   # web en http://localhost:5173
+```
+
+El `compose` usa BuildKit (`docker compose build`), sin el builder clásico
+deprecado. La imagen se construye en dos etapas: `node` compila `dist/` y
+`nginx:alpine` la sirve con la plantilla ya renderizada.
 
 ## Pruebas y calidad
 
