@@ -1,0 +1,56 @@
+# DeployWatch · Frontend
+
+Dashboard web para registrar repositorios públicos de GitHub (por URL) y ver bajo
+demanda si tienen despliegue configurado y si el último fue exitoso. La notificación
+es dentro de la aplicación: insignia 🔔 cuando el backend marca `needs_attention`.
+
+> Repositorio hermano: `deploywatch-backend` (API FastAPI).
+
+## Arquitectura
+
+```
+src/
+├── domain/          # Tipos (DeployOutcome, LastCheck, TrackedRepoView) y reglas:
+│                    # needsAttention(), badgeFor() + status.test.ts
+├── api/             # Cliente HTTP hacia /api del backend
+└── features/repos/  # Dashboard (formulario + lista) y RepoList con StatusBadge
+```
+
+La regla `needsAttention` replica al backend: `failure`, `no_deploy_setup` y
+`never_deployed` generan alerta; `success` e `in_progress`, no.
+
+## Requisitos
+
+- Node 20+
+- Backend en marcha (`http://localhost:8000` en desarrollo)
+
+## Instalación y uso local
+
+```bash
+npm install
+npm run dev     # http://localhost:5173 (proxy /api -> localhost:8000)
+```
+
+| Script | Descripción |
+|---|---|
+| `npm run dev` | Desarrollo con proxy al backend local |
+| `npm test` | Pruebas Vitest con cobertura |
+| `npm run lint` | ESLint |
+| `npm run build` | Compilación de producción a `dist/` |
+
+## Conexión con el backend
+
+- En desarrollo, `vite.config.ts` redirige `/api` a `http://localhost:8000`.
+- En producción (Nginx), `nginx.conf` redirige `/api/` al servicio `api:8000`.
+  Si despliegas frontend y backend por separado, ajusta ese `proxy_pass` a la URL
+  pública del backend.
+
+## Pruebas y calidad
+
+```bash
+npm test
+```
+
+- `src/domain/status.test.ts`: regla de alerta y mensaje para repos sin chequear.
+- CI (`.github/workflows/ci.yml`): install + tests + build.
+- SonarCloud (`sonar-project.properties`): usa `coverage/lcov.info`.
