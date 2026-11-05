@@ -22,12 +22,7 @@ export interface TrackedRepoView {
   last_check: LastCheck | null;
 }
 
-/** Mirrors backend domain rule: which outcomes raise an in-app alert. */
+/** Replica la regla del backend: estos resultados generan alerta en la app. */
 export function needsAttention(outcome: DeployOutcome): boolean {
   return outcome === "failure" || outcome === "no_deploy_setup" || outcome === "never_deployed";
-}
-
-export function badgeFor(repo: TrackedRepoView): string {
-  if (!repo.last_check) return "Not checked yet — press Check now.";
-  return repo.last_check.message;
 }
