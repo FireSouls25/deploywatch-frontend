@@ -2,50 +2,73 @@
 export const es = {
   app: {
     title: "DeployWatch",
-    subtitle:
-      "Registra cualquier repositorio público de GitHub y comprueba bajo demanda si tiene despliegue configurado y si el último fue exitoso.",
+    scope: (n: number, age: string) =>
+      n === 0
+        ? "Sin repositorios rastreados"
+        : `${n} ${n === 1 ? "repositorio" : "repositorios"} · comprobado ${age}`,
   },
-  summary: {
-    tracked: "rastreados",
-    attention: "con alerta",
-    healthy: "sanos",
-    attentionBanner: (n: number) =>
+  kpis: {
+    tracked: "Rastreados",
+    attention: "Con alerta",
+    healthy: "Sanos",
+    lastCheck: "Última comprobación",
+  },
+  notice: {
+    attention: (n: number) =>
       n === 1
-        ? "1 repositorio necesita tu atención."
-        : `${n} repositorios necesitan tu atención.`,
-    allClear: "Todo desplegando sin novedad.",
+        ? "1 repositorio necesita atención"
+        : `${n} repositorios necesitan atención`,
   },
   form: {
+    label: "Añadir repositorio público por URL o propietario/repo",
     placeholder: "https://github.com/propietario/repo",
     add: "Rastrear",
-    label: "URL o propietario/repo del repositorio público",
+  },
+  list: {
+    title: "Repositorios",
+    total: (n: number) => `${n} en total`,
+    origin: "Origen",
   },
   card: {
-    checkNow: "Comprobar ahora",
+    checkNow: "Comprobar",
     checking: "Comprobando…",
     remove: "Eliminar",
     viewDeploy: "Ver despliegue",
     notChecked: "Sin comprobar",
-    notCheckedHint: "Pulsa «Comprobar ahora» para consultar GitHub.",
-    origin: "Origen",
+    confirmRemove: (name: string) => `¿Dejar de rastrear ${name}?`,
+  },
+  age: {
+    now: "ahora mismo",
+    minutes: (n: number) => `hace ${n} min`,
+    hours: (n: number) => `hace ${n} h`,
+    days: (n: number) => (n === 1 ? "ayer" : `hace ${n} días`),
+    date: (iso: string) => `el ${iso.slice(0, 10)}`,
+    never: "—",
   },
   states: {
     loading: "Cargando repositorios…",
     empty: "Aún no rastreas ningún repositorio.",
-    emptyHint: "Pega arriba la URL de un repo público para empezar.",
+    emptyHint: "Añade arriba la URL de un repo público para empezar.",
     loadError: "No se pudo cargar la lista.",
     actionError: "La operación no se pudo completar.",
+    retry: "Reintentar",
   },
   status: {
     success: "Desplegado",
     failure: "Fallo",
     in_progress: "En curso",
-    never_deployed: "Nunca desplegado",
+    never_deployed: "Sin estrenar",
     no_deploy_setup: "Sin despliegue",
     unknown: "Desconocido",
   },
-  footer: {
-    note: "Lee workflows, deployments (Cloudflare, Vercel, Netlify…) y environments directamente de la API de GitHub.",
+  provider: {
+    cloudflare: "Cloudflare",
+    vercel: "Vercel",
+    netlify: "Netlify",
+    "github-actions": "Actions",
+    "github-pages": "Pages",
+    external: "Externo",
+    none: "—",
   },
 } as const;
 

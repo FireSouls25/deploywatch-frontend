@@ -10,13 +10,15 @@ es dentro de la aplicación: insignia 🔔 cuando el backend marca `needs_attent
 
 ```
 src/
-├── domain/          # Tipos (DeployOutcome, LastCheck, TrackedRepoView) y la regla
-│                    # needsAttention() + status.test.ts
-├── i18n/            # Diccionarios por idioma (solo `es` por ahora) + es.test.ts.
+├── domain/          # Tipos (DeployOutcome, LastCheck, TrackedRepoView), regla
+│                    # needsAttention(), edades formatAge() + pruebas
+├── i18n/            # Diccionarios por idioma (solo `es` por ahora) + pruebas.
 │                    # Todo el texto visible sale de aquí; sin texto hardcodeado.
 ├── api/             # Cliente HTTP hacia /api del backend
-├── styles.css       # Tema oscuro tipo consola: design tokens, tarjetas, botones
-└── features/repos/  # Dashboard (resumen + formulario) y RepoList con tarjetas
+├── styles.css       # Tema data-terminal: tokens, franja de indicadores, filas
+└── features/repos/  # Dashboard (resumen + formulario), RepoList (filas con
+                     # marca de proveedor, pastilla de estado y edad) y
+                     # ProviderMark (logos Cloudflare, Vercel, Netlify, GitHub)
 ```
 
 La regla `needsAttention` replica al backend: `failure`, `no_deploy_setup` y

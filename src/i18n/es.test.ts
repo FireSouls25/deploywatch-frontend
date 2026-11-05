@@ -15,7 +15,7 @@ describe("diccionario español", () => {
     for (const text of texts) expect(text.trim()).not.toBe("");
   });
 
-  it("cubre todos los estados de despliegue", () => {
+  it("cubre todos los estados y proveedores", () => {
     for (const outcome of [
       "success",
       "failure",
@@ -25,10 +25,20 @@ describe("diccionario español", () => {
       "unknown",
     ] as const)
       expect(t.status[outcome].trim()).not.toBe("");
+    for (const provider of [
+      "cloudflare",
+      "vercel",
+      "netlify",
+      "github-actions",
+      "github-pages",
+      "external",
+      "none",
+    ] as const)
+      expect(t.provider[provider].trim()).not.toBe("");
   });
 
   it("conjuga el aviso según el conteo", () => {
-    expect(t.summary.attentionBanner(1)).toContain("1 repositorio");
-    expect(t.summary.attentionBanner(3)).toContain("3 repositorios");
+    expect(t.notice.attention(1)).toContain("1 repositorio");
+    expect(t.notice.attention(3)).toContain("3 repositorios");
   });
 });

@@ -13,6 +13,7 @@ export interface LastCheck {
   run_url: string | null;
   checked_at: string;
   needs_attention: boolean;
+  provider: string;
 }
 
 export interface TrackedRepoView {

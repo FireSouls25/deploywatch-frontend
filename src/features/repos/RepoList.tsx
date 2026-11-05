@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { api } from "../../api/client";
 import type { DeployOutcome, TrackedRepoView } from "../../domain/status";
+import { formatAge } from "../../domain/time";
 import { t } from "../../i18n/es";
+import { ProviderMark } from "./ProviderMark";
 
-const toneFor = (outcome: DeployOutcome | null): string => {
+function toneOf(outcome: DeployOutcome | null): string {
   switch (outcome) {
     case "success":
       return "ok";
@@ -16,29 +18,16 @@ const toneFor = (outcome: DeployOutcome | null): string => {
     default:
       return "idle";
   }
-};
-
-export function StatusBeacon({ repo }: { repo: TrackedRepoView }) {
-  const check = repo.last_check;
-  const tone = toneFor(check?.outcome ?? null);
-  const label = check ? t.status[check.outcome] : t.card.notChecked;
-  return (
-    <span
-      className={`beacon${check?.needs_attention ? " pulse" : ""}`}
-      data-tone={tone}
-    >
-      <i aria-hidden="true" />
-      {label}
-    </span>
-  );
 }
 
 export function RepoList({
   repos,
   onChange,
+  nowMs,
 }: {
   repos: TrackedRepoView[];
   onChange: () => void;
+  nowMs: number;
 }) {
   const [checking, setChecking] = useState<string | null>(null);
 
@@ -52,67 +41,76 @@ export function RepoList({
     }
   };
 
-  const remove = async (id: string) => {
-    await api.remove(id);
+  const remove = async (repo: TrackedRepoView) => {
+    if (!window.confirm(t.card.confirmRemove(repo.full_name))) return;
+    await api.remove(repo.id);
     onChange();
   };
 
   return (
-    <ul className="grid">
+    <ul className="repo-list">
       {repos.map((r) => {
         const checkState = r.last_check;
-        const stateClass = !checkState
-          ? ""
-          : checkState.needs_attention
-            ? "attention"
-            : "healthy";
         return (
-          <li key={r.id} className={`card ${stateClass}`}>
-            <div className="card-head">
-              <a
-                className="repo-link"
-                href={r.url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {r.full_name}
-              </a>
-              <StatusBeacon repo={r} />
-            </div>
-            <p className="card-message">
-              {checkState ? checkState.message : t.card.notCheckedHint}
-            </p>
-            <div className="card-meta">
-              {checkState?.workflow_name && (
-                <span>
-                  {t.card.origin}: <code>{checkState.workflow_name}</code>
-                </span>
-              )}
-              {checkState?.run_url && (
+          <li key={r.id} className="repo-row">
+            <div>
+              <div className="repo-id">
+                <ProviderMark provider={checkState?.provider ?? "none"} />
                 <a
-                  className="deploy-link"
-                  href={checkState.run_url}
+                  className="repo-link"
+                  href={r.url}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {t.card.viewDeploy} →
+                  {r.full_name}
                 </a>
-              )}
+                <span className="pill" data-tone={toneOf(checkState?.outcome ?? null)}>
+                  {checkState ? t.status[checkState.outcome] : t.card.notChecked}
+                </span>
+              </div>
+              <p className="repo-sub">
+                {checkState ? (
+                  <>
+                    {checkState.message}{" "}
+                    {checkState.workflow_name &&
+                      !checkState.message.includes(checkState.workflow_name) && (
+                        <code>{checkState.workflow_name}</code>
+                      )}{" "}
+                    {checkState.run_url && (
+                      <a
+                        className="deploy-link"
+                        href={checkState.run_url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {t.card.viewDeploy}
+                      </a>
+                    )}
+                  </>
+                ) : (
+                  t.card.notChecked
+                )}
+              </p>
             </div>
-            <div className="card-actions">
-              <button
-                className="btn btn-small"
-                onClick={() => check(r.id)}
-                disabled={checking === r.id}
-              >
-                {checking === r.id ? t.card.checking : t.card.checkNow}
-              </button>
-              <button
-                className="btn btn-small btn-danger"
-                onClick={() => remove(r.id)}
-              >
-                {t.card.remove}
-              </button>
+            <div className="repo-side">
+              <span className="age">
+                {formatAge(checkState?.checked_at ?? null, nowMs)}
+              </span>
+              <div className="row-actions">
+                <button
+                  className="btn btn-small"
+                  onClick={() => check(r.id)}
+                  disabled={checking === r.id}
+                >
+                  {checking === r.id ? t.card.checking : t.card.checkNow}
+                </button>
+                <button
+                  className="btn btn-small btn-danger"
+                  onClick={() => remove(r)}
+                >
+                  {t.card.remove}
+                </button>
+              </div>
             </div>
           </li>
         );
