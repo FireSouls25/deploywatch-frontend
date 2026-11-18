@@ -40,6 +40,7 @@ npm run dev     # http://localhost:5173 (proxy /api -> localhost:8000)
 |---|---|
 | `npm run dev` | Desarrollo con proxy al backend local |
 | `npm test` | Pruebas Vitest con cobertura |
+| `npm run lint` | ESLint con reglas tipadas (promesas sin manejar, hooks) |
 | `npm run lint` | ESLint |
 | `npm run build` | Compilación de producción a `dist/` |
 

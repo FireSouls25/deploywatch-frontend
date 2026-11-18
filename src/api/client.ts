@@ -5,21 +5,23 @@ async function ensureOk(res: Response) {
   return res;
 }
 
-async function json(res: Response) {
-  return (await ensureOk(res)).json();
+async function json<T>(res: Response): Promise<T> {
+  return (await ensureOk(res)).json() as Promise<T>;
 }
 
 export const api = {
   list: (): Promise<TrackedRepoView[]> =>
-    fetch("/api/repos").then(json),
+    fetch("/api/repos").then(json<TrackedRepoView[]>),
   track: (url: string): Promise<TrackedRepoView> =>
     fetch("/api/repos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
-    }).then(json),
+    }).then(json<TrackedRepoView>),
   check: (id: string): Promise<{ last_check: TrackedRepoView["last_check"] }> =>
-    fetch(`/api/repos/${id}/check`, { method: "POST" }).then(json),
+    fetch(`/api/repos/${id}/check`, { method: "POST" }).then(
+      json<{ last_check: TrackedRepoView["last_check"] }>
+    ),
   remove: (id: string): Promise<void> =>
     fetch(`/api/repos/${id}`, { method: "DELETE" })
       .then(ensureOk)

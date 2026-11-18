@@ -18,10 +18,10 @@ describe("api client", () => {
     const created = await api.track("octo/repo");
 
     expect(created.id).toBe("1");
-    const [path, init] = fetchMock.mock.calls[0];
+    const [path, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(path).toBe("/api/repos");
     expect(init.method).toBe("POST");
-    expect(JSON.parse(init.body)).toEqual({ url: "octo/repo" });
+    expect(JSON.parse(init.body as string)).toEqual({ url: "octo/repo" });
   });
 
   it.each([
