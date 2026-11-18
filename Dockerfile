@@ -2,7 +2,7 @@
 FROM node:20-slim AS build
 WORKDIR /web
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 COPY . .
 RUN npm run build
 
