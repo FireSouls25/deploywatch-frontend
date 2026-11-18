@@ -1,27 +1,57 @@
 name: ci
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Acciones fijadas por SHA completo (versión en el comentario) para evitar
+# ataques a la cadena de suministro por etiquetas mutables.
 jobs:
-  frontend:
+  test:
     runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # Sonar necesita el historial para el "código nuevo"
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci --ignore-scripts
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Pruebas + quality gate de cobertura (80 %)
+        run: npm test
+
+      - name: Reporte HTML de cobertura
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-html
+          path: coverage/
+          if-no-files-found: ignore
+
+      - name: Build
+        run: npm run build
+
+      # Se ejecuta en el mismo job para reutilizar coverage/lcov.info.
+      - name: SonarCloud
+        if: env.SONAR_TOKEN != ''
+        uses: SonarSource/sonarqube-scan-action@59202af334b4ba7b5db01b701b8e79f8b3bef0f4 # v8.5.0
+
   docker:
     runs-on: ubuntu-latest
-    needs: [frontend]
+    needs: [test]
     steps:
-      - uses: actions/checkout@v4
-      - run: docker compose build
-  sonar:
-    runs-on: ubuntu-latest
-    needs: [frontend]
-    if: ${{ secrets.SONAR_TOKEN != '' }}
-    steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: sonarsource/sonarcloud-github-action@v2
-        env: { SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} }
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: docker build -t deploywatch-frontend:${{ github.sha }} .

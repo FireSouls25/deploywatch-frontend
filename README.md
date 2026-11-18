@@ -71,5 +71,9 @@ npm test
 ```
 
 - `src/domain/status.test.ts`: regla de alerta y mensaje para repos sin chequear.
-- CI (`.github/workflows/ci.yml`): install + tests + build.
+- CI (`.github/workflows/ci.yml`): install sin scripts → lint → tests con
+  **quality gate de cobertura (80 %)** → reporte HTML como artifact → build →
+  SonarCloud → build Docker. Acciones fijadas por SHA.
+- SonarCloud (`sonar-project.properties`): usa `coverage/lcov.info`. Requiere el
+  secreto `SONAR_TOKEN` y tener desactivado *Automatic Analysis* en SonarCloud.
 - SonarCloud (`sonar-project.properties`): usa `coverage/lcov.info`.
