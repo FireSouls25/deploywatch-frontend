@@ -1,8 +1,12 @@
 import type { TrackedRepoView } from "../domain/status";
 
-async function json(res: Response) {
+async function ensureOk(res: Response) {
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-  return res.json();
+  return res;
+}
+
+async function json(res: Response) {
+  return (await ensureOk(res)).json();
 }
 
 export const api = {
@@ -17,5 +21,7 @@ export const api = {
   check: (id: string): Promise<{ last_check: TrackedRepoView["last_check"] }> =>
     fetch(`/api/repos/${id}/check`, { method: "POST" }).then(json),
   remove: (id: string): Promise<void> =>
-    fetch(`/api/repos/${id}`, { method: "DELETE" }).then(() => undefined),
+    fetch(`/api/repos/${id}`, { method: "DELETE" })
+      .then(ensureOk)
+      .then(() => undefined),
 };
