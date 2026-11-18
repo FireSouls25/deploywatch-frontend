@@ -27,7 +27,7 @@ export function Dashboard() {
   };
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, []);
 
   const add = async () => {
@@ -88,7 +88,7 @@ export function Dashboard() {
         className="track-form"
         onSubmit={(e) => {
           e.preventDefault();
-          add();
+          void add();
         }}
       >
         <label htmlFor="repo-url">{t.form.label}</label>
@@ -124,7 +124,7 @@ export function Dashboard() {
       ) : failed ? (
         <div className="state-box">
           <p>{t.states.loadError}</p>
-          <button className="btn" onClick={refresh}>
+          <button className="btn" onClick={() => void refresh()}>
             {t.states.retry}
           </button>
         </div>
@@ -134,7 +134,12 @@ export function Dashboard() {
           <p>{t.states.emptyHint}</p>
         </div>
       ) : (
-        <RepoList repos={repos} onChange={refresh} nowMs={nowMs} />
+        <RepoList
+          repos={repos}
+          onChange={refresh}
+          onError={() => setError(t.states.actionError)}
+          nowMs={nowMs}
+        />
       )}
     </div>
   );

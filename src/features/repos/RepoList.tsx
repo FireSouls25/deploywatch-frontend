@@ -23,10 +23,12 @@ function toneOf(outcome: DeployOutcome | null): string {
 export function RepoList({
   repos,
   onChange,
+  onError,
   nowMs,
 }: {
   repos: TrackedRepoView[];
-  onChange: () => void;
+  onChange: () => Promise<void>;
+  onError: () => void;
   nowMs: number;
 }) {
   const [checking, setChecking] = useState<string | null>(null);
@@ -35,7 +37,9 @@ export function RepoList({
     setChecking(id);
     try {
       await api.check(id);
-      onChange();
+      await onChange();
+    } catch {
+      onError();
     } finally {
       setChecking(null);
     }
@@ -43,8 +47,12 @@ export function RepoList({
 
   const remove = async (repo: TrackedRepoView) => {
     if (!window.confirm(t.card.confirmRemove(repo.full_name))) return;
-    await api.remove(repo.id);
-    onChange();
+    try {
+      await api.remove(repo.id);
+      await onChange();
+    } catch {
+      onError();
+    }
   };
 
   return (
@@ -99,14 +107,14 @@ export function RepoList({
               <div className="row-actions">
                 <button
                   className="btn btn-small"
-                  onClick={() => check(r.id)}
+                  onClick={() => void check(r.id)}
                   disabled={checking === r.id}
                 >
                   {checking === r.id ? t.card.checking : t.card.checkNow}
                 </button>
                 <button
                   className="btn btn-small btn-danger"
-                  onClick={() => remove(r)}
+                  onClick={() => void remove(r)}
                 >
                   {t.card.remove}
                 </button>
