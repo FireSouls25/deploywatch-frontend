@@ -65,7 +65,7 @@ jobs:
 
       - name: Desplegar en staging + smoke test (rollback si falla)
         id: deploy
-        run: ./scripts/deploy.sh "$IMAGE:$SHA" "${{ steps.stable.outputs.image }}"
+        run: python3 scripts/deploy.py "$IMAGE:$SHA" "${{ steps.stable.outputs.image }}"
 
       - name: Promover a estable
         if: success() && env.SIMULAR_FALLO != 'true'
