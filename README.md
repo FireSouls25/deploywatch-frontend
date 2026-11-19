@@ -77,3 +77,18 @@ npm test
 - SonarCloud (`sonar-project.properties`): usa `coverage/lcov.info`. Requiere el
   secreto `SONAR_TOKEN` y tener desactivado *Automatic Analysis* en SonarCloud.
 - SonarCloud (`sonar-project.properties`): usa `coverage/lcov.info`.
+
+## Despliegue continuo (CD)
+
+`.github/workflows/cd.yml` corre cuando el CI de `main` termina en verde:
+
+1. Construye la imagen y la publica en GHCR con el SHA del commit como etiqueta.
+2. `scripts/deploy.sh` levanta staging con un backend simulado y la versión `:stable`
+   actual, y la reemplaza por la nueva.
+3. **Smoke test**: `index.html`, el bundle JS que referencia y el proxy `/api/health`.
+   Si falla, **rollback** automático a `:stable` y el pipeline queda en rojo; si pasa,
+   la imagen nueva se promueve a `:stable`.
+4. Si existen los secretos `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`, avisa por Telegram.
+
+Para demostrar el rollback: *Actions → cd → Run workflow* con `simular_fallo` marcado
+(`BACKEND_URL` apunta a un host inexistente y nginx no arranca).
