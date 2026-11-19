@@ -40,7 +40,7 @@ http.server.HTTPServer(("", 8000), H).serve_forever()' >/dev/null
 
 run_web() { # <imagen> <backend-url>
   docker rm -f "$WEB" >/dev/null 2>&1 || true
-  docker run -d --name "$WEB" --network "$NET" -p 8080:80 -e BACKEND_URL="$2" "$1" >/dev/null
+  docker run -d --name "$WEB" --network "$NET" -p 8080:8080 -e BACKEND_URL="$2" "$1" >/dev/null
 }
 
 smoke_test() {
@@ -67,7 +67,10 @@ BROKEN_URL="http://backend-inexistente:8000"
 if [[ -n "$STABLE_IMAGE" ]]; then
   log "Versión estable actual: $STABLE_IMAGE"
   run_web "$STABLE_IMAGE" "$GOOD_URL"
-  smoke_test
+  if ! smoke_test; then
+    echo "La versión estable no pasa el smoke test: no sirve como punto de rollback."
+    STABLE_IMAGE=""
+  fi
   end
 fi
 

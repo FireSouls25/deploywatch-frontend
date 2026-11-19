@@ -6,4 +6,4 @@ services:
     # Permite que el contenedor alcance al backend corriendo en el host (Linux).
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    ports: ["5173:80"]
+    ports: ["5173:8080"]

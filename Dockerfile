@@ -6,9 +6,11 @@ RUN npm ci --ignore-scripts
 COPY . .
 RUN npm run build
 
-FROM nginx:alpine
+# nginx sin privilegios: corre como el usuario "nginx" (uid 101) en el puerto 8080.
+FROM nginxinc/nginx-unprivileged:alpine
 COPY --from=build /web/dist /usr/share/nginx/html
-COPY nginx.conf.template /etc/nginx/conf.d/default.conf.template
-EXPOSE 80
-# Solo se sustituye BACKEND_URL; el resto de variables nginx ($uri, etc.) se conserva.
-CMD ["/bin/sh", "-c", "envsubst '${BACKEND_URL}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]
+# El entrypoint oficial renderiza /etc/nginx/templates/*.template con envsubst,
+# sustituyendo solo variables de entorno definidas (BACKEND_URL); $uri se conserva.
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+USER nginx
+EXPOSE 8080
